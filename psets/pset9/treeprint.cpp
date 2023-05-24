@@ -40,7 +40,7 @@
  * Start cmd window, change its property font to use '³ª´®°íµñÄÚµù'.
  * 
  */
-
+// On my honor, I pledge that I have neither received nor provided improper assistance in the completion of this assignment. name:ByunDongHyun student Number: 22200356
 #include <iostream>
 #include <string>
 #include <cassert>

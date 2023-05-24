@@ -34,7 +34,7 @@
 ///   root = grow(root, 3);	// a new node is added
 ///   root = trim(root, 5);	// if first node is removed,
 ///          
-
+// On my honor, I pledge that I have neither received nor provided improper assistance in the completion of this assignment. name:ByunDongHyun student Number: 22200356
 #include <iostream>
 #include <cassert>
 #include <climits>
@@ -60,17 +60,16 @@ int degree(tree t) {
 // height = -1 for empty tree, 0 for root only tree
 int height(tree node) {
 	if (empty(node)) return -1;
-
-	cout << "your code here \n";
-	return 0;
+	int leftHeight = height(node->left);
+    int rightHeight = height(node->right);
+    return max(leftHeight, rightHeight) + 1;
 }
 
 // Computes the size of the binary tree dyamically by
 // traversing the nodes recursively.
 int size(tree node) {
 	if (empty(node)) return 0;
-	cout << "your code here \n";
-	return 1;
+	return size(node->left) + size(node->right) + 1;
 }
 
 bool empty(tree t) {
@@ -85,7 +84,9 @@ int value(tree t) {
 // frees all nodes while traversing the tree like postorder
 tree clear(tree t) {
 	if (empty(t)) return nullptr;
-	cout << "your code here \n";
+	t->left = clear(t->left);
+    t->right = clear(t->right);
+    delete t;
 	return nullptr;
 }
 
@@ -93,7 +94,9 @@ tree clear(tree t) {
 // search a key in binary search tree(BST) recursively.
 bool contains(tree node, int key) {
 	if (empty(node)) return false;
-	cout << "your code here \n";
+	if (node->key == key) return true;
+    if (key < node->key) return contains(node->left, key);
+    return contains(node->right, key);
 	return true;
 }
 
@@ -101,8 +104,8 @@ bool contains(tree node, int key) {
 // search a key in binary tree(BT) recursively.
 bool containsBT(tree node, int key) {
 	if (empty(node)) return false;
-	cout << "your code here \n";
-	return true;
+	if (node->key == key) return true;
+    return containsBT(node->left, key) || containsBT(node->right, key);
 }
 
 // does there exist a key-value pair with given key?
@@ -131,7 +134,13 @@ tree find(tree node, int key) {
 tree findBT(tree root, int key) {
 	if (empty(root)) return nullptr;
 
-	cout << "your code here \n";
+	if (root->key == key) return root;
+
+    tree leftResult = findBT(root->left, key);
+    if (leftResult != nullptr) return leftResult;
+
+    tree rightResult = findBT(root->right, key);
+    if (rightResult != nullptr) return rightResult;
 
 	return nullptr;
 }
@@ -141,7 +150,15 @@ tree findBT(tree root, int key) {
 bool findPathBack(tree root, tree x, vector<int>& path) {
 	if (root == nullptr) return false;
 
-	cout << "your code here \n";
+	if (root == x) {
+        path.push_back(root->key);
+        return true;
+    }
+
+    if (findPathBack(root->left, x, path) || findPathBack(root->right, x, path)) {
+        path.push_back(root->key);
+        return true;
+    }
 
 	return false;
 }  // path from node x to root is produced.
@@ -153,7 +170,15 @@ bool findPath(tree node, tree x, vector<int>& path) {
 	DPRINT(cout << ">findPath size=" << path.size() << endl;);
 	if (empty(node)) return false;
 
-	cout << "your code here \n";
+	if (node == x) {
+        path.push_back(node->key);
+        return true;
+    }
+
+    if (findPath(node->left, x, path) || findPath(node->right, x, path)) {
+        path.push_back(node->key);
+        return true;
+    }
 
 	DPRINT(cout << "<findPath not found, pop:" << node->key << endl;);
 	return false;
@@ -176,7 +201,11 @@ tree grow(tree node, int key) {
 	DPRINT(cout << ">grow key=" << key << endl;);
 	if (node == nullptr) return new TreeNode(key);
 
-	cout << "your code here\n";
+	 if (key < node->key)
+        node->left = grow(node->left, key);
+    else if (key > node->key)
+        node->right = grow(node->right, key);
+
 
 	// do nothing, the duplicate key is not allowed
 	DPRINT(cout << "<grow returns key=" << node->key << endl;);
@@ -200,7 +229,31 @@ tree grow(tree node, int key) {
 tree growBT(tree root, int key) {
 	DPRINT(cout << ">growBT key=" << key << endl;);
 
-	cout << "your code here\n";
+	if (root == nullptr) return new TreeNode(key);
+
+    queue<tree> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        tree curr = q.front();
+        q.pop();
+
+        if (curr->left == nullptr) {
+            curr->left = new TreeNode(key);
+            break;
+        }
+        else {
+            q.push(curr->left);
+        }
+
+        if (curr->right == nullptr) {
+            curr->right = new TreeNode(key);
+            break;
+        }
+        else {
+            q.push(curr->right);
+        }
+    }
 
 	DPRINT(cout << "<growBT" << endl;);
 	return root;    // eventually returns the original root node
@@ -236,9 +289,9 @@ tree trim(tree node, int key) {
 	// found the key: delete the node now 
 	// node with two childeren: replace it with the successor or predecessor
 	else if (node->left && node->right) {
-
-		cout << "your code here\n";
-
+		tree successor = succ(node);
+        node->key = successor->key;
+        node->right = trim(node->right, successor->key);
 	}
 
 	DPRINT(if (node != nullptr) cout << "<trim returns: key=" << node->key << endl;);
@@ -248,16 +301,25 @@ tree trim(tree node, int key) {
 
 // returns a successor of the tree
 tree succ(tree node) {
-	cout << "your code here\n";
-	return nullptr;
+    if (node == nullptr) return nullptr;
+    if (node->right) {
+        node = node->right;
+        while (node->left)
+            node = node->left;
+    }
+    return node;
 }
 
 // returns a predeccessor of the tree
 tree pred(tree node) {
-	cout << "your code here\n";
-	return nullptr;
+    if (node == nullptr) return nullptr;
+    if (node->left) {
+        node = node->left;
+        while (node->right)
+            node = node->right;
+    }
+    return node;
 }
-
 // Given a binary search tree, return the min or max key in the tree.
 // Don't need to traverse the entire tree.
 tree maximum(tree node) {			// returns max node
@@ -271,36 +333,52 @@ tree minimum(tree node) {			// returns min node
 }
 
 // Given a binary tree, return the max key in the tree.
-tree maximumBT(tree node) {			
-	if (node == nullptr) return node;
-	cout << "your code here\n";
-	return nullptr;
+tree maximumBT(tree node) {
+    if (node == nullptr) return nullptr;
+
+    while (node->right)
+        node = node->right;
+
+    return node;
 }
 
-tree minimumBT(tree node) {			// returns min node
-	if (node == nullptr) return node;
-	cout << "your code here\n";
-	return nullptr;
+tree minimumBT(tree node) {
+    if (node == nullptr) return nullptr;
+
+    while (node->left)
+        node = node->left;
+
+    return node;
 }
 
 // Given a binary tree, its node values in inorder are passed
 // back through the argument v which is passed by reference.
 void inorder(tree node, vector<int>& v) {
-	if (empty(node)) return;
-	cout << "inorder1: your code here\n";
+    if (empty(node)) return;
+
+    inorder(node->left, v);
+    v.push_back(node->key);
+    inorder(node->right, v);
 }
 
 // returns a vector that has tree nodes in inorder instead of keys.
 void inorder(tree node, vector<tree>& v) {
-	if (empty(node)) return;
-	cout << "inorder2: your code here\n";
+    if (empty(node)) return;
+
+    inorder(node->left, v);
+    v.push_back(node);
+    inorder(node->right, v);
 }
 
 // Given a binary tree, its node values in postorder are passed
 // back through the argument v which is passed by reference.
 void postorder(tree node, vector<int>& v) {
 	DPRINT(cout << ">postorder size=" << v.size() << endl;);
-	cout << "your code here\n";
+	 if (empty(node)) return;
+
+    postorder(node->left, v);
+    postorder(node->right, v);
+    v.push_back(node->key);
 	DPRINT(cout << "<postorder key=" << node->key << endl;);
 }
 
@@ -308,7 +386,11 @@ void postorder(tree node, vector<int>& v) {
 // back through the argument v which is passed by reference.
 void preorder(tree node, vector<int>& v) {
 	DPRINT(cout << ">preorder size=" << v.size() << endl;);
-	cout << "your code here\n";
+	if (empty(node)) return;
+
+    v.push_back(node->key);
+    preorder(node->left, v);
+    preorder(node->right, v);
 	DPRINT(cout << "<preorder key=" << node->key << endl;);
 }
 
@@ -324,7 +406,18 @@ void levelorder(tree root, vector<int>& vec) {
 	DPRINT(cout << ">levelorder";);
 	if (empty(root)) return;
 
-	cout << "your code here\n";
+	queue<tree> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        tree node = q.front();
+        q.pop();
+
+        vec.push_back(node->key);
+
+        if (node->left) q.push(node->left);
+        if (node->right) q.push(node->right);
+    }
 
 	DPRINT(cout << "<levelorder size=" << vec.size() << endl;);
 }
@@ -333,20 +426,31 @@ void levelorder(tree root, vector<int>& vec) {
 tree LCA_BT(tree root, tree p, tree q) {  // recursive solution
 	DPRINT(cout << ">LCA_BT" << endl;);
 	// base case 1: no p or q found
-	if (root == nullptr) return nullptr;
+	   if (root == nullptr || root == p || root == q) return root;
 
-	cout << "your code here\n";
+    tree left = LCA_BT(root->left, p, q);
+    tree right = LCA_BT(root->right, p, q);
 
-	return root;
+    if (left && right) return root;
+    return (left != nullptr) ? left : right;
 }
 
 // returns LCA(Least Common Ancestor) of a binary tree [BT]
-int LCA_BTiteration(tree root, tree p, tree q) {  
-	DPRINT(cout << ">LCA_BTiteration" << endl;);
+int LCA_BTiteration(tree root, tree p, tree q) {
+    if (root == nullptr) return -1;
 
-	cout << "your code here\n";
+    while (root) {
+        if (root == p || root == q) return root->key;
 
-	return 0;
+        if (containsBT(root->left, p->key) && containsBT(root->left, q->key))
+            root = root->left;
+        else if (containsBT(root->right, p->key) && containsBT(root->right, q->key))
+            root = root->right;
+        else
+            break;
+    }
+
+    return root->key;
 }
 
 // returns LCA(Least Common Ancestor) of a binary search tree
@@ -360,19 +464,30 @@ int LCA_BTiteration(tree root, tree p, tree q) {
 tree LCA(tree root, tree p, tree q) {  // recursive solution
 	DPRINT(cout << ">LCA" << endl;);
 
-	cout << "your code here\n";
+	if (root == nullptr || root == p || root == q) return root;
 
-	DPRINT(cout << "<LCA" << endl;);
-	return root;
+    if (root->key > p->key && root->key > q->key)
+        return LCA(root->left, p, q);
+    else if (root->key < p->key && root->key < q->key)
+        return LCA(root->right, p, q);
+    else
+        return root;
 }
 
 int LCAiteration(tree root, tree p, tree q) {  // iteration solution
 	DPRINT(cout << ">LCAiteration " << endl;);
+	if (root == nullptr) return -1;
 
-	cout << "your code here\n";
+    while (root) {
+        if (root->key > p->key && root->key > q->key)
+            root = root->left;
+        else if (root->key < p->key && root->key < q->key)
+            root = root->right;
+        else
+            break;
+    }
 
-	DPRINT(cout << "<LCAiteration"  << endl;);
-	return 0;
+    return root->key;
 }
 
 // does this binary tree satisfy symmetric order?
@@ -383,11 +498,18 @@ int LCAiteration(tree root, tree p, tree q) {  // iteration solution
 bool isBST(tree x, int min, int max) {
 	if (empty(x)) return true;
 	DPRINT(cout << ">isBST key=" << x->key << "\t min=" << min << " max=" << max << endl;);
+	if (x->key < min || x->key > max)
+        return false;
 
-	cout << "your code here\n";
+    // Recursively check the left and right subtrees
+    bool leftBST = isBST(x->left, min, x->key - 1);    // Update the maximum value for the left subtree
+    bool rightBST = isBST(x->right, x->key + 1, max);  // Update the minimum value for the right subtree
 
-	DPRINT(cout << "<isBST key=" << x->key << "\t min=" << min << " max=" << max << " false\n";);
-	return false;
+    // Return true only if both subtrees are valid BSTs
+    bool isValidBST = leftBST && rightBST;
+
+    DPRINT(cout << "<isBST key=" << x->key << "\t min=" << min << " max=" << max << " " << isValidBST << endl;);
+    return isValidBST;
 }
 
 // returns true if the tree is a binary search tree, otherwise false.
@@ -399,13 +521,13 @@ bool isBST(tree root) {
 }
 
 // a helper function to get keys in BT and save them in a set.
-void get_keys(tree root, set<int> &keys) {
+void get_Keys(tree root, set<int>& keys) {
 	DPRINT(cout << " >get_keys" << endl;);
 	if (root == nullptr) return;
 	keys.insert(root->key);
 	DPRINT(cout << " get(" << root->key << ") " << endl;);
-	get_keys(root->left, keys);
-	get_keys(root->right, keys);
+	get_Keys(root->left, keys);
+	get_Keys(root->right, keys);
 	DPRINT(cout << " ><get_keys" << endl;);
 }
 
@@ -414,10 +536,23 @@ void get_keys(tree root, set<int> &keys) {
 
 // returns a BST converted from a binary tree in-place. 
 // Use a vector or set in STL. Do not use an array to store keys.
+void set_Keys(tree root, const set<int>& keys, int& index) {
+    if (root == nullptr) return;
+    
+    set_Keys(root->left, keys, index);
+    root->key = *next(keys.begin(), index++);
+    set_Keys(root->right, keys, index);
+}
+
 void BTtoBST(tree root) {
 	DPRINT(cout << ">BTtoBST" << endl;);
 	
-	cout << "your code here\n";
+	set<int> keys;
+    get_Keys(root, keys);
+    
+    int index = 0;
+    set_Keys(root, keys, index);
+    
 
 	DPRINT(cout << ">BTtoBST" << endl;);
 }
@@ -495,7 +630,22 @@ tree growN(tree root, int N, bool AVLtree) {
 tree trimN(tree root, int N, bool AVLtree) {
 	DPRINT(cout << ">trimN N=" << N << endl;);
 
-	cout << "your code here\n";
+	vector<int> keys;
+    inorder(root, keys);
+
+    srand(time(0)); // Seed the random number generator
+
+    while (N > 0 && !keys.empty()) {
+        int randomIndex = rand() % keys.size(); // Generate a random index
+        int key = keys[randomIndex]; // Get the key at the random index
+
+        root = trim(root, key); // Trim the node with the key
+
+        keys.erase(keys.begin() + randomIndex); // Remove the key from the vector
+        N--;
+    }
+
+    if (AVLtree) root = reconstruct(root);
 
 	////////////// use this line with AVL code completion /////////
 	// if (AVLtree) root = reconstruct(root);
@@ -514,10 +664,10 @@ bool balanced(tree node) {
 int balanceFactor(tree node) {
 	DPRINT(cout << " bf" << endl;);
 	if (empty(node)) return 0;
+	int leftHeight = height(node->left);
+    int rightHeight = height(node->right);
 
-	cout << "your code here\n";
-
-	return 100;
+    return leftHeight - rightHeight;
 }
 
 // returns true if the tree is AVL tree.
@@ -536,43 +686,67 @@ bool isAVL(tree root) {
 
 tree rotateLL(tree A) {
 	DPRINT(cout << "\t[LL]case at " << A->key << endl;);
-	cout << "\t[LL]case at " << A->key << endl;
-	cout << "your code here\n";
-	return A;
+
+    tree B = A->left;
+    A->left = B->right;
+    B->right = A;
+
+    DPRINT(cout << "\t[LL]rotated " << A->key << " to " << B->key << endl;);
+    return B;
 }
 
 tree rotateRR(tree A) {
-	DPRINT(cout << "\t[RR]case at " << A->key << endl;);
-	cout << "\t[RR]case at " << A->key << endl;
-	cout << "your code here\n";
-	return A;
+    DPRINT(cout << "\t[RR]case at " << A->key << endl;);
+
+    tree B = A->right;
+    A->right = B->left;
+    B->left = A;
+
+    DPRINT(cout << "\t[RR]rotated " << A->key << " to " << B->key << endl;);
+    return B;
 }
 
 tree rotateLR(tree A) {
-	DPRINT(cout << "\t[LR]case at " << A->key << endl;);
-	cout << "\t[LR]case at " << A->key << endl;
-	cout << "your code here\n";
-	return A;
+    DPRINT(cout << "\t[LR]case at " << A->key << endl;);
+
+    A->left = rotateRR(A->left);
+    A = rotateLL(A);
+
+    DPRINT(cout << "\t[LR]rotated " << A->key << endl;);
+    return A;
 }
 
 tree rotateRL(tree A) {
-	DPRINT(cout << "\t[RL]case at " << A->key << endl;);
-	cout << "\t[RL]case at " << A->key << endl;
-	cout << "your code here\n";
-	return A;
+    DPRINT(cout << "\t[RL]case at " << A->key << endl;);
+
+    A->right = rotateLL(A->right);
+    A = rotateRR(A);
+
+    DPRINT(cout << "\t[RL]rotated " << A->key << endl;);
+    return A;
 }
 
 // rebalnces at the node only, not recursively, and
 // returns the node that may be different from the input node
 tree rebalance(tree node) {
-	DPRINT(cout << ">rebalance at:" << node->key << endl;);
+    DPRINT(cout << ">rebalance at: " << node->key << endl;);
 
-	// get balance factor first
+    int balance = balanceFactor(node);
 
-	cout << "your code here\n";
+    if (balance > 1) {
+        if (balanceFactor(node->left) >= 0)
+            node = rotateLL(node);
+        else
+            node = rotateLR(node);
+    } else if (balance < -1) {
+        if (balanceFactor(node->right) <= 0)
+            node = rotateRR(node);
+        else
+            node = rotateRL(node);
+    }
 
-	DPRINT(cout << "<no rebalance " << endl;);
-	return node;
+    DPRINT(cout << "<rebalance at: " << node->key << endl;);
+    return node;
 }
 
 // rebuilds an AVL/BST tree with a list of keys sorted.
@@ -581,7 +755,15 @@ tree buildAVL(int* v, int n) {  // recreation method
 	if (n <= 0) return nullptr;
 	DPRINT(cout << ">buildAVL v[0]=" << v[0] << " n=" << n << " mid=" << n / 2 << endl;);
 
-	cout << "your code here\n";
+	
+	int mid = n / 2;
+	tree root = new TreeNode(v[mid]);
+
+	root->left = buildAVL(v, mid);
+	root->right = buildAVL(v + mid + 1, n - mid - 1);
+
+	DPRINT(cout << "<buildAVL" << n << endl;);
+	return root;
 
 	return nullptr;
 }
@@ -592,10 +774,14 @@ tree buildAVL(tree* v, int n) {  // recycling method
 	if (n <= 0) return nullptr;
 	DPRINT(cout << ">buildAVL v[0]=" << v[0] << " n=" << n << " mid=" << n / 2 << endl;);
 
-	cout << "your code here\n";
+	int mid = n / 2;
+	tree root = v[mid];
+
+	root->left = buildAVL(v, mid);
+	root->right = buildAVL(v + mid + 1, n - mid - 1);
 
 	DPRINT(cout << "<buildAVL" << n << endl;);
-	return nullptr;
+	return root;
 }
 
 // reconstructs a new AVL tree in O(n), Actually it is O(n) + O(n).
@@ -628,7 +814,10 @@ tree growAVL(tree node, int key) {
 	DPRINT(cout << ">growAVL key=" << key << endl;);
 	if (empty(node)) return new TreeNode(key);
 
-	cout << "your code here\n";
+	if (key < node->key)
+		node->left = growAVL(node->left, key);
+	else if (key > node->key)
+		node->right = growAVL(node->right, key);
 
 	return rebalance(node);      // O(log n)
 }
@@ -648,10 +837,19 @@ tree trimAVL(tree node, int key) {
 		node->right = trimAVL(node->right, key);
 	// node with two childeren: replace it with the successor or predecessor
 	else if (node->left && node->right) {
-		cout << "your code here\n";
+		tree predecessor = node->left;
+            while (predecessor->right)
+                predecessor = predecessor->right;
+            node->key = predecessor->key;
+            node->left = trimAVL(node->left, predecessor->key);
 	}
 	else {  // node with only one child or no child
-		cout << "your code here\n";
+		tree temp = node;
+            if (node->left)
+                node = node->left;
+            else
+                node = node->right;
+            delete temp;  // Remove the node
 	}
 
 	if (node == nullptr) return node;   // redundant code, but useful

@@ -34,7 +34,7 @@
 ///   root = grow(root, 3);	// a new node is added
 ///   root = trim(root, 5);	// if first node is removed,
 ///          
-
+// // On my honor, I pledge that I have neither received nor provided improper assistance in the completion. 이름:변동현 학번:22200356
 #include <iostream>
 #include <cassert>
 #include <climits>
@@ -173,15 +173,25 @@ tree findParent(tree t, int key, tree parent) {
 // inserts a new node with the key in given binary search tree and
 // returns the new node such that client use it properly.
 tree grow(tree node, int key) {
-	DPRINT(cout << ">grow key=" << key << endl;);
-	if (node == nullptr) return new TreeNode(key);
-
-	cout << "your code here\n";
-
-	// do nothing, the duplicate key is not allowed
-	DPRINT(cout << "<grow returns key=" << node->key << endl;);
-	return node;    // eventually returns the original root node
+    DPRINT(cout << ">grow key=" << key << endl;);
+    
+    if (node == nullptr) {
+        return new TreeNode(key);
+    }
+    
+    if (key < node->key) {
+        node->left = grow(node->left, key);
+    } else if (key > node->key) {
+        node->right = grow(node->right, key);
+    } else {
+        DPRINT(cout << "<grow returns key=" << node->key << endl;);
+        return node; // duplicate key is not allowed, return the original node
+    }
+    
+    DPRINT(cout << "<grow returns key=" << key << endl;);
+    return node;    // eventually returns the original root node
 }
+
 
 // inserts a node with the key and returns the root of the binary tree.
 // Traversing it in level order, find the first empty node in the tree.
@@ -236,27 +246,65 @@ tree trim(tree node, int key) {
 	// found the key: delete the node now 
 	// node with two childeren: replace it with the successor or predecessor
 	else if (node->left && node->right) {
-
-		cout << "your code here\n";
-
+		// find the successor and replace the node's key with it.
+		tree temp = node->right;
+		while (temp->left) temp = temp->left; // find the leftmost node in the right subtree.
+		node->key = temp->key; // replace the key of the node to delete.
+		node->right = trim(node->right, temp->key); // delete the successor node.
 	}
-
+	else { // node with zero or one child: just remove it and connect its child to its parent.
+		tree temp = node;
+		if (node->left == nullptr) node = node->right;
+		else if (node->right == nullptr) node = node->left;
+		delete temp;
+	}
 	DPRINT(if (node != nullptr) cout << "<trim returns: key=" << node->key << endl;);
 	DPRINT(if (node == nullptr) cout << "<trim returns: nullptr)\n";);
 	return node;
 }
 
-// returns a successor of the tree
+
 tree succ(tree node) {
-	cout << "your code here\n";
-	return nullptr;
+    if (node == nullptr) {
+        return nullptr;
+    }
+    
+    if (node->right != nullptr) { 
+        node = node->right;
+        while (node->left != nullptr) {
+            node = node->left;
+        }
+        return node;
+    }
+    
+    while (node->right == nullptr && node->left != nullptr) {
+        node = node->left;
+    }
+    
+    return node->right;
 }
 
-// returns a predeccessor of the tree
 tree pred(tree node) {
-	cout << "your code here\n";
-	return nullptr;
+    if (node == nullptr) {
+        return nullptr;
+    }
+    
+    if (node->left != nullptr) { 
+        node = node->left;
+        while (node->right != nullptr) {
+            node = node->right;
+        }
+        return node;
+    }
+    
+    while (node->left == nullptr && node->right != nullptr) {
+        node = node->right;
+    }
+    
+    return node->left; 
 }
+
+
 
 // Given a binary search tree, return the min or max key in the tree.
 // Don't need to traverse the entire tree.
@@ -273,14 +321,19 @@ tree minimum(tree node) {			// returns min node
 // Given a binary tree, return the max key in the tree.
 tree maximumBT(tree node) {			
 	if (node == nullptr) return node;
-	cout << "your code here\n";
-	return nullptr;
+	while (node->right != nullptr) {
+		node = node->right;
+	}
+	return node;
 }
 
-tree minimumBT(tree node) {			// returns min node
+// Given a binary tree, return the min key in the tree.
+tree minimumBT(tree node) {			
 	if (node == nullptr) return node;
-	cout << "your code here\n";
-	return nullptr;
+	while (node->left != nullptr) {
+		node = node->left;
+	}
+	return node;
 }
 
 // Given a binary tree, its node values in inorder are passed
@@ -493,15 +546,25 @@ tree growN(tree root, int N, bool AVLtree) {
 // It gets N node keys from the tree, trim one by one randomly.
 // For AVL tree, use BST trim() and reconstruct() once at root.
 tree trimN(tree root, int N, bool AVLtree) {
-	DPRINT(cout << ">trimN N=" << N << endl;);
+    DPRINT(cout << ">trimN N=" << N << endl;);
 
-	cout << "your code here\n";
+    vector<int> keys;
+    inorder(root, keys);
+    int treeSize = size(root);
 
-	////////////// use this line with AVL code completion /////////
-	// if (AVLtree) root = reconstruct(root);
+    if (N > treeSize) N = treeSize; 
 
-	DPRINT(cout << "<trimN size=" << size(root) << endl;);
-	return root;
+    srand(time(NULL)); 
+    for (int i = 0; i < N; i++) {
+        int randIndex = rand() % keys.size();
+        root = trim(root, keys[randIndex]); 
+        keys.erase(keys.begin() + randIndex); 
+    }
+
+    if (AVLtree) root = reconstruct(root); 
+
+    DPRINT(cout << "<trimN size=" << size(root) << endl;);
+    return root;
 }
 
 ////////////////////////// AVL Tree ///////////////////////////////
