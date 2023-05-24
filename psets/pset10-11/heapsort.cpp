@@ -34,7 +34,7 @@ a[11]: A C E H I L N O R S T
 *
 * author: idebtor@gmail.com
 */
-
+// On my honor, I pledge that I have neither received nor provided improper assistance in the completion of this assignment. //NAME:BYUNDONGHYUN STUDENT NUMBER:22200356
 #include <iostream>
 #include <cstring>
 using namespace std;
@@ -61,7 +61,10 @@ void swim(char* a, int k, int N) {
 	DPRINT(cout << ">swim int=" << a[k] << " @ k=" << k << " N=" << N << endl;);
 	int k_saved = k;
 
-	cout << "your code here\n";
+	while (k > 1 && comp(a, k/2, k)) {
+		swap(a[k], a[k/2]);
+		k = k/2;
+	}
 
 	cout << "   N=" << N << " k=" << k_saved << " ";
 	for (int i = 1; i <= N; i++) cout << a[i] << " ";
@@ -73,7 +76,13 @@ void sink(char* a, int k, int N) {
 	DPRINT(cout << ">sink int=" << a[k] << " @ k=" << k << " N=" << N << endl;);
 	int k_saved = k;
 
-	cout << "your code here\n";
+	while (2*k <= N) {
+		int j = 2*k;
+		if (j < N && comp(a, j, j+1)) j++;
+		if (!comp(a, k, j)) break;
+		swap(a[k], a[j]);
+		k = j;
+	}
 
 	cout << "   N=" << N << " k=" << k_saved << " ";
 	for (int i = 1; i <= N; i++) cout << a[i] << " ";
@@ -82,18 +91,29 @@ void sink(char* a, int k, int N) {
 
 // use swim() and push a node in prority queue (or a heap)
 void grow(char *a, char key, int& N) {
-	cout << "your code here\n";
-}
+	a[++N] = key;
+	swim(a, N, N);
 
+	cout << "   N=" << N << " ";
+	for (int i = 1; i <= N; i++) cout << a[i] << " ";
+	cout << endl;
+}
 // pop a node in priority queue (or a heap); use swap() and sink 
 void trim(char *a, int& N) {
-	cout << "your code here\n";
+	swap(a[1], a[N]);
+	N--;
+	sink(a, 1, N);
+
+	cout << "   N=" << N << " ";
+	for (int i = 1; i <= N; i++) cout << a[i] << " ";
+	cout << endl;
 }
 
 // use sink() and construct a heap structure from a CBT
 void heapify(char *a, int N) {
-
-	cout << "your code here\n";
+	for (int k = N/2; k >= 1; k--) {
+		sink(a, k, N);
+	}
 }
 
 // sort a heap using both heapify() and trim() only.
@@ -103,7 +123,7 @@ void heapsort(char* a, int N) {
 	// start 'sink' at the last internal node and go up.
 	cout << "1st pass(heapify - O(n)) begins:\n";
 
-	cout << "your code here\n";
+	heapify(a, N);
 
 	cout << "HeapOrdered: ";
 	for (k = 1; k <= N; k++) cout << a[k] << " ";
@@ -112,7 +132,15 @@ void heapsort(char* a, int N) {
 	// 2nd pass: get the max out (from root while N > 1)
 	cout << "2nd pass(trim: swap and sink - O(n log n) begins:\n";
 
-	cout << "your code here\n";
+	while (N > 1) {
+		swap(a[1], a[N]);
+		N--;
+		sink(a, 1, N);
+	}
+
+	cout << "a[" << N << "]: ";
+	for (k = 1; k <= N; k++) cout << a[k] << " ";
+	cout << endl;
 }
 
 void show(char* a, int N) {
