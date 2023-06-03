@@ -28,6 +28,8 @@
 *   2019/05/05  C++ Conversion, Using std::vector, stack, queue
 */
 
+// On my honor, I pledge that I have neither received nor provided improper assistance in the completion of this assignment. // Name:ByunDongHyun Studentnumber:22200356
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -238,12 +240,20 @@ graph clear(graph g) {
 }
 
 // prints the adjacency list of graph
-void print_adjlist(graph g){
+void print_adjlist(graph g) {
 	if (empty(g)) return;
 
-	cout << "your code here: use for-loop style, not while loop \n";
-
+	for (int i = 0; i < V(g); i++) {
+		cout << i << ":";
+		gnode curr = g->adj[i].next;
+		while (curr != nullptr) {
+			cout << " " << curr->item;
+			curr = curr->next;
+		}
+		cout << endl;
+	}
 }
+
 
 // prints dotted lines read from the graph text file.
 void print_graph(graph g) {
@@ -369,7 +379,8 @@ void BFS(graph g, int v) {
 				g->marked[w->item] = true;
 				que.push(w->item);			// queued to process next
 				sav.push(w->item);			// save the result
-				cout << "your code here";   // set parentBFS[] & distTo[]
+				g->parentBFS[w->item] = cur;   // set parentBFS[]
+				g->distTo[w->item] = g->distTo[cur] + 1; // set distTo[]
 			}
 		}
 	}
@@ -393,9 +404,14 @@ void BFS_CCs(graph g) {
 		g->distTo[i] = -1;
 	}
 		
-	// BFS for all connected components starting from 0
-	cout << "your code here to replace the next line\n";
-	BFS(g, 0);
+	queue<int> que;
+
+  for (int v = 0; v < V(g); v++) {
+        if (!g->marked[v]) {
+            BFS(g, v); // Call BFS for each component
+            setBFS0(g, v, g->BFSv);
+        }
+    }
 
 	g->BFSv = {};  // clear it not to display, queue<int>().swap(g->BFSv);
 	DPRINT(cout << "\n<BFS_CCs\n";);
@@ -440,7 +456,15 @@ void DFS(graph g, int v, queue<int>& que) {
 	g->marked[v] = true;	// visited
 	que.push(v);			// save the path
 
-	cout << "your code here (recursion) \n";
+	gnode curr = g->adj[v].next;
+	while (curr != nullptr) {
+		int w = curr->item;
+		if (!g->marked[w]) {
+			g->parentDFS[w] = v;
+			DFS(g, w, que);
+		}
+		curr = curr->next;
+	}
 
 	DPRINT(cout << "\t <_DFS: v=" << v << endl;);
 }
@@ -460,9 +484,16 @@ void DFS_CCs(graph g) {
 	}
 	
 	queue<int> que;
-	cout << "your code here: make it work with multiple CC's\n";
-	DFS(g, 0, que);
-	setDFS0(g, 0, que);		  // set results into DFS0[] and CCID[]
+	int CCID = 1; // Connected Component ID
+	for (int i = 0; i < V(g); i++) {
+		if (!g->marked[i]) {
+			cout << "Connected Component " << CCID << ": ";
+			DFS(g, i, que);
+			setDFS0(g, i, que); // set results into DFS0[] and CCID[]
+			CCID++;
+			cout << endl;
+		}
+	}
 
 	g->DFSv = {};                  // clear it not to display, queue<int>().swap(g->DFSv);		 
 	DPRINT(cout << "<DFS_CCs\n";);
@@ -485,7 +516,19 @@ void DFSpath(graph g, int v, int w, stack<int>& path) {
 	g->DFSv = q;			     // DFS result at v 
 
 	path = {};                   // clear path, stack<int>().swap(path);  
-	cout << "your code here\n";  // push v to w path to the stack path 
+	stack<int> tempStack;
+	int curr = w;
+	tempStack.push(curr);
+
+	while (curr != v && g->parentDFS[curr] != -1) {
+		curr = g->parentDFS[curr];
+		tempStack.push(curr);
+	}
+
+	while (!tempStack.empty()) {
+		path.push(tempStack.top());
+		tempStack.pop();
+	} 
 
 	DPRINT(cout << "<DFSpath " << endl;);
 }
@@ -500,7 +543,24 @@ void BFSpath(graph g, int v, int w, stack<int>& path) {
 	BFS(g, v);                   // g->BFSv updated already.
 
 	path = {};                   // clear path
-	cout << "your code here\n";  // push v to w path to the stack path 
+
+	if (g->parentBFS[w] == -1)
+		return;
+
+	stack<int> tempStack;
+	int curr = w;
+	tempStack.push(curr);
+
+	while (curr != v && g->parentBFS[curr] != -1) {
+		curr = g->parentBFS[curr];
+		tempStack.push(curr);
+	}
+
+	while (!tempStack.empty()) {
+		path.push(tempStack.top());
+		tempStack.pop();
+	}
+ 
 
 	DPRINT(cout << "<BFSpath " << endl;);
 }
@@ -520,6 +580,16 @@ int distTo(graph g, int v, int w) {
 
 	BFS(g, v);
 
-	cout << "your code here\n";      // compute and return distance
-	return 0;
+	if (g->parentBFS[w] == -1)
+		return 0;
+
+	int distance = 0;
+	int curr = w;
+
+	while (curr != v) {
+		curr = g->parentBFS[curr];
+		distance++;
+	}
+
+	return distance;
 }

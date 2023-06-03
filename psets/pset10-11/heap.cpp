@@ -26,7 +26,7 @@
 *
 *  author: idebtor@gmail.com
 */
-
+// On my honor, I pledge that I have neither received nor provided improper assistance in the completion of this assignment. //NAME:BYUNDONGHYUN STUDENT NUMBER:22200356
 #include <iostream>
 #include <cassert>
 #include <cmath>
